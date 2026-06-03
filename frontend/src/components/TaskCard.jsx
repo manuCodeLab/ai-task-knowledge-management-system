@@ -11,9 +11,9 @@ export default function TaskCard({ task, canUpdate, onComplete }) {
           {completed ? <CheckCircle2 size={17} /> : <Circle size={17} />}
           {task.status}
         </div>
-        <h3>{task.title}</h3>
+        <h3>#{task.id} {task.title}</h3>
         <p>{task.description || "No description"}</p>
-        <span>Assigned to {task.assignee_name || `user #${task.assigned_to}`}</span>
+        <span>Assigned to {task.assignee_name || "User"} #{task.assigned_to}</span>
       </div>
       {canUpdate && !completed && (
         <button onClick={() => onComplete(task.id)}>

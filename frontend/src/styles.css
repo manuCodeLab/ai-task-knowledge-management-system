@@ -144,6 +144,16 @@ input {
   margin: 0;
 }
 
+.success {
+  color: #136f63;
+  font-weight: 700;
+  margin: 0 0 14px;
+}
+
+.task-error {
+  margin-bottom: 14px;
+}
+
 .page-heading {
   align-items: center;
   display: flex;

@@ -7,21 +7,38 @@ import { api, getSessionUser } from "../services/api.js";
 export default function Tasks() {
   const [tasks, setTasks] = useState([]);
   const [form, setForm] = useState({ title: "", description: "", assigned_to: "" });
+  const [message, setMessage] = useState("");
+  const [error, setError] = useState("");
+  const [saving, setSaving] = useState(false);
   const user = getSessionUser();
 
   async function loadTasks() {
-    const { data } = await api.get("/tasks");
-    setTasks(data);
+    try {
+      const { data } = await api.get("/tasks");
+      setTasks(data);
+    } catch (err) {
+      setError(err.response?.data?.detail || "Could not load tasks");
+    }
   }
 
   async function createTask(event) {
     event.preventDefault();
-    await api.post("/tasks", {
-      ...form,
-      assigned_to: Number(form.assigned_to),
-    });
-    setForm({ title: "", description: "", assigned_to: "" });
-    loadTasks();
+    setError("");
+    setMessage("");
+    setSaving(true);
+    try {
+      const { data } = await api.post("/tasks", {
+        ...form,
+        assigned_to: Number(form.assigned_to),
+      });
+      setForm({ title: "", description: "", assigned_to: "" });
+      await loadTasks();
+      setMessage(`Task #${data.id} created`);
+    } catch (err) {
+      setError(err.response?.data?.detail || "Could not create task");
+    } finally {
+      setSaving(false);
+    }
   }
 
   async function completeTask(taskId) {
@@ -59,11 +76,14 @@ export default function Tasks() {
             placeholder="User ID"
             required
           />
-          <button>
-            <Plus size={18} /> Create
+          <button disabled={saving}>
+            <Plus size={18} /> {saving ? "Creating" : "Create"}
           </button>
         </form>
       )}
+
+      {message && <p className="success">{message}</p>}
+      {error && <p className="error task-error">{error}</p>}
 
       <div className="list">
         {tasks.map((task) => (
