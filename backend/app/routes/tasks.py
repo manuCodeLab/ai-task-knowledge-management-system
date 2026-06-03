@@ -26,11 +26,20 @@ def serialize_task(task: Task) -> TaskOut:
 
 @router.get("", response_model=list[TaskOut])
 def list_tasks(
-    current_user: User = Depends(get_current_user), db: Session = Depends(get_db)
+    status: str | None = None,
+    assigned_to: int | None = None,
+    current_user: User = Depends(get_current_user),
+    db: Session = Depends(get_db),
 ):
     query = db.query(Task)
     if current_user.role.name != "admin":
         query = query.filter(Task.assigned_to == current_user.id)
+    elif assigned_to is not None:
+        query = query.filter(Task.assigned_to == assigned_to)
+    if status is not None:
+        if status not in {"pending", "completed"}:
+            raise HTTPException(status_code=400, detail="Invalid task status")
+        query = query.filter(Task.status == status)
     return [serialize_task(task) for task in query.order_by(Task.created_at.desc()).all()]
 
 

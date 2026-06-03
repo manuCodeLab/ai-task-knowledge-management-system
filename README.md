@@ -108,3 +108,17 @@ GET /documents
 POST /search
 GET /analytics
 ```
+
+## Assignment Requirement Status
+
+```txt
+Authentication & RBAC: Done
+MySQL relational schema with PK/FK: Done
+Document upload for .txt files: Done
+Embedding-based semantic search with ChromaDB: Done
+Task create, view, and status update: Done
+Dynamic filtering API: Done with /tasks?status=pending and /tasks?assigned_to=2
+Activity logging: Done for login, document upload, task create/update, and search
+Analytics: Done with task counts, document/user/log counts, search count, and top searched queries
+React frontend: Done
+```
