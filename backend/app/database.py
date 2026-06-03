@@ -26,7 +26,10 @@ def normalize_database_url(database_url: str) -> tuple[str, dict]:
     connect_args = {}
     is_aiven_host = bool(parsed.hostname and "aivencloud.com" in parsed.hostname)
     if ssl_mode or is_aiven_host:
-        connect_args["ssl"] = ssl.create_default_context()
+        ssl_context = ssl.create_default_context()
+        ssl_context.check_hostname = False
+        ssl_context.verify_mode = ssl.CERT_NONE
+        connect_args["ssl"] = ssl_context
     return normalized, connect_args
 
 
