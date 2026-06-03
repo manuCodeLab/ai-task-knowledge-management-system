@@ -12,6 +12,18 @@ export default function Documents() {
     setDocuments(data);
   }
 
+  async function downloadDocument(document) {
+    const { data } = await api.get(`/documents/${document.id}/download`, {
+      responseType: "blob",
+    });
+    const url = URL.createObjectURL(data);
+    const link = window.document.createElement("a");
+    link.href = url;
+    link.download = document.title;
+    link.click();
+    URL.revokeObjectURL(url);
+  }
+
   useEffect(() => {
     loadDocuments();
   }, []);
@@ -28,6 +40,9 @@ export default function Documents() {
             <h3>{document.title}</h3>
             <p>{document.file_path}</p>
             <span>Uploaded by user #{document.uploaded_by}</span>
+            <div className="card-actions">
+              <button onClick={() => downloadDocument(document)}>Download</button>
+            </div>
           </article>
         ))}
       </div>
