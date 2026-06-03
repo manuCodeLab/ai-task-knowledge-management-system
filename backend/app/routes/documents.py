@@ -1,4 +1,5 @@
 from pathlib import Path
+import mimetypes
 
 from fastapi import APIRouter, Depends, File, HTTPException, UploadFile, status
 from fastapi.responses import FileResponse
@@ -8,7 +9,7 @@ from app.database import get_db
 from app.models.document import Document
 from app.models.user import User
 from app.schemas.document import DocumentOut
-from app.services.document_service import save_text_file
+from app.services.document_service import save_knowledge_file
 from app.services.embedding_service import index_document
 from app.services.log_service import log_activity
 from app.utils.rbac import get_current_user, require_roles
@@ -23,7 +24,7 @@ def upload_document(
     db: Session = Depends(get_db),
 ):
     try:
-        file_path, text = save_text_file(file)
+        file_path, text = save_knowledge_file(file)
     except ValueError as exc:
         raise HTTPException(status_code=400, detail=str(exc)) from exc
 
@@ -69,6 +70,6 @@ def download_document(
 
     return FileResponse(
         path=file_path,
-        media_type="text/plain",
+        media_type=mimetypes.guess_type(document.title)[0] or "application/octet-stream",
         filename=document.title,
     )

@@ -26,7 +26,7 @@ export default function UploadDocument({ onUploaded }) {
 
   return (
     <form className="toolbar" onSubmit={submit}>
-      <input type="file" accept=".txt" onChange={(event) => setFile(event.target.files[0])} />
+      <input type="file" accept=".txt,.pdf" onChange={(event) => setFile(event.target.files[0])} />
       <button disabled={!file || loading}>
         <Upload size={18} /> {loading ? "Uploading" : "Upload"}
       </button>

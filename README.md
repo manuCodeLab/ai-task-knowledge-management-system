@@ -11,7 +11,7 @@ The frontend is built with React.js.
 Core features:
 - JWT login
 - Admin/User role-based access
-- Document upload
+- Document upload for .txt and .pdf files
 - Embedding-based semantic search
 - Task assignment and status update
 - Activity logging
@@ -114,7 +114,7 @@ GET /analytics
 ```txt
 Authentication & RBAC: Done
 MySQL relational schema with PK/FK: Done
-Document upload for .txt files: Done
+Document upload for .txt and .pdf files: Done
 Embedding-based semantic search with ChromaDB: Done
 Task create, view, and status update: Done
 Dynamic filtering API: Done with /tasks?status=pending and /tasks?assigned_to=2
