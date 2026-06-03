@@ -14,10 +14,21 @@ load_dotenv()
 
 app = FastAPI(title="AI Task Knowledge Management API")
 
-frontend_origin = os.getenv("FRONTEND_ORIGIN", "http://localhost:5173")
+frontend_origins = [
+    origin.strip()
+    for origin in os.getenv("FRONTEND_ORIGIN", "http://localhost:5173").split(",")
+    if origin.strip()
+]
+frontend_origins.extend(
+    [
+        "http://localhost:5173",
+        "http://localhost:3000",
+        "https://ai-task-knowledge-management-system.vercel.app",
+    ]
+)
 app.add_middleware(
     CORSMiddleware,
-    allow_origins=[frontend_origin, "http://localhost:3000"],
+    allow_origins=sorted(set(frontend_origins)),
     allow_credentials=True,
     allow_methods=["*"],
     allow_headers=["*"],
