@@ -52,6 +52,8 @@ def create_task(
     assignee = db.query(User).filter(User.id == payload.assigned_to).first()
     if not assignee:
         raise HTTPException(status_code=404, detail="Assigned user not found")
+    if assignee.role.name != "user":
+        raise HTTPException(status_code=400, detail="Tasks can be assigned only to users")
 
     task = Task(
         title=payload.title,

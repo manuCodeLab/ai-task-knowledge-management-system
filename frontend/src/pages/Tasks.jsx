@@ -73,7 +73,7 @@ export default function Tasks() {
             type="number"
             value={form.assigned_to}
             onChange={(event) => setForm({ ...form, assigned_to: event.target.value })}
-            placeholder="User ID"
+            placeholder="User ID, e.g. 2"
             required
           />
           <button disabled={saving}>
