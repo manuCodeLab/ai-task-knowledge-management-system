@@ -1,3 +1,4 @@
+import React from "react";
 import { useState } from "react";
 import SearchBox from "../components/SearchBox.jsx";
 import { api } from "../services/api.js";

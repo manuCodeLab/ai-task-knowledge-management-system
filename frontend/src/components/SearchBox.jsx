@@ -1,4 +1,5 @@
 import { Search } from "lucide-react";
+import React from "react";
 import { useState } from "react";
 
 export default function SearchBox({ onSearch, loading }) {

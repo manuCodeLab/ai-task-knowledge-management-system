@@ -1,4 +1,5 @@
 import { BarChart3, ClipboardList, FileText, Search } from "lucide-react";
+import React from "react";
 import { Link } from "react-router-dom";
 
 const actions = [

@@ -1,4 +1,5 @@
 import { BarChart3, ClipboardList, FileText, LogOut, Search } from "lucide-react";
+import React from "react";
 import { NavLink, useNavigate } from "react-router-dom";
 import { clearSession } from "../services/api.js";
 

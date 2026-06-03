@@ -1,4 +1,5 @@
 import { CheckCircle2, Circle } from "lucide-react";
+import React from "react";
 
 export default function TaskCard({ task, canUpdate, onComplete }) {
   const completed = task.status === "completed";
