@@ -154,6 +154,15 @@ input {
   margin-bottom: 14px;
 }
 
+.muted {
+  color: #68798b;
+  margin: 0 0 14px;
+}
+
+.analytics-list {
+  margin-top: 16px;
+}
+
 .page-heading {
   align-items: center;
   display: flex;

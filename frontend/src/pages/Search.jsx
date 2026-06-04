@@ -6,12 +6,16 @@ import { api } from "../services/api.js";
 export default function Search() {
   const [results, setResults] = useState([]);
   const [loading, setLoading] = useState(false);
+  const [error, setError] = useState("");
 
   async function search(query) {
+    setError("");
     setLoading(true);
     try {
       const { data } = await api.post("/search", { query, top_k: 5 });
       setResults(data.results);
+    } catch (err) {
+      setError(err.response?.data?.detail || "Search failed");
     } finally {
       setLoading(false);
     }
@@ -23,6 +27,8 @@ export default function Search() {
         <h1>Search</h1>
       </div>
       <SearchBox onSearch={search} loading={loading} />
+      {loading && <p className="muted">Searching knowledge base...</p>}
+      {error && <p className="error task-error">{error}</p>}
       <div className="list">
         {results.map((result, index) => (
           <article className="card" key={`${result.document_id}-${index}`}>

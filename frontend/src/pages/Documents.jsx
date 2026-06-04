@@ -5,11 +5,20 @@ import { api, getSessionUser } from "../services/api.js";
 
 export default function Documents() {
   const [documents, setDocuments] = useState([]);
+  const [loading, setLoading] = useState(true);
+  const [error, setError] = useState("");
   const user = getSessionUser();
 
   async function loadDocuments() {
-    const { data } = await api.get("/documents");
-    setDocuments(data);
+    setError("");
+    try {
+      const { data } = await api.get("/documents");
+      setDocuments(data);
+    } catch (err) {
+      setError(err.response?.data?.detail || "Could not load documents");
+    } finally {
+      setLoading(false);
+    }
   }
 
   async function downloadDocument(document) {
@@ -34,6 +43,8 @@ export default function Documents() {
         <h1>Documents</h1>
       </div>
       {user?.role === "admin" && <UploadDocument onUploaded={loadDocuments} />}
+      {loading && <p className="muted">Loading documents...</p>}
+      {error && <p className="error task-error">{error}</p>}
       <div className="list">
         {documents.map((document) => (
           <article className="card" key={document.id}>

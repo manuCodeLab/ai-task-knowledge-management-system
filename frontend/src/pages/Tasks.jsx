@@ -13,6 +13,7 @@ export default function Tasks() {
   const user = getSessionUser();
 
   async function loadTasks() {
+    setError("");
     try {
       const { data } = await api.get("/tasks");
       setTasks(data);
@@ -84,6 +85,7 @@ export default function Tasks() {
 
       {message && <p className="success">{message}</p>}
       {error && <p className="error task-error">{error}</p>}
+      {tasks.length === 0 && !error && <p className="muted">No tasks found</p>}
 
       <div className="list">
         {tasks.map((task) => (
