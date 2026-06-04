@@ -1,14 +1,17 @@
 import os
+import threading
 
 from dotenv import load_dotenv
 from fastapi import FastAPI
 from fastapi.middleware.cors import CORSMiddleware
+from sqlalchemy import inspect, text
 
 from app.database import Base, SessionLocal, engine
 from app.models.role import Role
 from app.models.user import User
 from app.routes import analytics, auth, documents, search, tasks
 from app.services.auth_service import hash_password
+from app.services.embedding_service import get_collection, get_model
 
 load_dotenv()
 
@@ -83,10 +86,37 @@ def seed_defaults():
         db.close()
 
 
+def warm_embedding_backend():
+    try:
+        get_collection()
+        get_model()
+    except Exception:
+        pass
+
+
+def ensure_document_download_columns():
+    inspector = inspect(engine)
+    existing_columns = {
+        column["name"] for column in inspector.get_columns("documents")
+    }
+    migrations = {
+        "file_content": "ALTER TABLE documents ADD COLUMN file_content LONGBLOB NULL",
+        "content_type": "ALTER TABLE documents ADD COLUMN content_type VARCHAR(100) NULL",
+        "file_size": "ALTER TABLE documents ADD COLUMN file_size INT NULL",
+    }
+
+    with engine.begin() as connection:
+        for column_name, statement in migrations.items():
+            if column_name not in existing_columns:
+                connection.execute(text(statement))
+
+
 @app.on_event("startup")
 def on_startup():
     Base.metadata.create_all(bind=engine)
+    ensure_document_download_columns()
     seed_defaults()
+    threading.Thread(target=warm_embedding_backend, daemon=True).start()
 
 
 app.include_router(auth.router)

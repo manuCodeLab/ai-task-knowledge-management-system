@@ -4,7 +4,7 @@ from uuid import uuid4
 from fastapi import UploadFile
 from pypdf import PdfReader
 
-UPLOAD_DIR = Path("uploads")
+UPLOAD_DIR = Path(__file__).resolve().parents[2] / "uploads"
 UPLOAD_DIR.mkdir(exist_ok=True)
 
 
@@ -14,7 +14,7 @@ def extract_pdf_text(file_path: Path) -> str:
     return "\n".join(pages).strip()
 
 
-def save_knowledge_file(file: UploadFile) -> tuple[str, str]:
+def save_knowledge_file(file: UploadFile) -> tuple[str, str, bytes, str]:
     if not file.filename:
         raise ValueError("File name is required")
 
@@ -36,4 +36,5 @@ def save_knowledge_file(file: UploadFile) -> tuple[str, str]:
     if not text.strip():
         raise ValueError("No readable text found in uploaded file")
 
-    return str(destination), text
+    content_type = file.content_type or "application/octet-stream"
+    return str(destination.resolve()), text, content, content_type

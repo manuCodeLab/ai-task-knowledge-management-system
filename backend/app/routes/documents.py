@@ -2,7 +2,7 @@ from pathlib import Path
 import mimetypes
 
 from fastapi import APIRouter, Depends, File, HTTPException, UploadFile, status
-from fastapi.responses import FileResponse
+from fastapi.responses import FileResponse, Response
 from sqlalchemy.orm import Session
 
 from app.database import get_db
@@ -15,6 +15,7 @@ from app.services.log_service import log_activity
 from app.utils.rbac import get_current_user, require_roles
 
 router = APIRouter(prefix="/documents", tags=["Documents"])
+BACKEND_ROOT = Path(__file__).resolve().parents[2]
 
 
 @router.post("/upload", response_model=DocumentOut, status_code=status.HTTP_201_CREATED)
@@ -24,13 +25,16 @@ def upload_document(
     db: Session = Depends(get_db),
 ):
     try:
-        file_path, text = save_knowledge_file(file)
+        file_path, text, content, content_type = save_knowledge_file(file)
     except ValueError as exc:
         raise HTTPException(status_code=400, detail=str(exc)) from exc
 
     document = Document(
         title=file.filename or "Untitled document",
         file_path=file_path,
+        file_content=content,
+        content_type=content_type,
+        file_size=len(content),
         uploaded_by=current_user.id,
     )
     db.add(document)
@@ -64,9 +68,30 @@ def download_document(
     if not document:
         raise HTTPException(status_code=404, detail="Document not found")
 
+    if document.file_content:
+        download_name = document.title.replace('"', "")
+        return Response(
+            content=document.file_content,
+            media_type=document.content_type
+            or mimetypes.guess_type(document.title)[0]
+            or "application/octet-stream",
+            headers={
+                "Content-Disposition": f'attachment; filename="{download_name}"',
+                "Content-Length": str(document.file_size or len(document.file_content)),
+            },
+        )
+
     file_path = Path(document.file_path)
+    if not file_path.exists() and not file_path.is_absolute():
+        file_path = BACKEND_ROOT / file_path
     if not file_path.exists():
-        raise HTTPException(status_code=404, detail="Uploaded file is not available")
+        raise HTTPException(
+            status_code=404,
+            detail=(
+                "Uploaded file is not available. Re-upload this document after "
+                "redeploying the backend so the PDF is saved in the database."
+            ),
+        )
 
     return FileResponse(
         path=file_path,

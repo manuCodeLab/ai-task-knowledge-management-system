@@ -1,5 +1,6 @@
 from passlib.context import CryptContext
 from sqlalchemy.orm import Session
+from sqlalchemy.orm import joinedload
 
 from app.models.user import User
 
@@ -15,7 +16,7 @@ def verify_password(password: str, password_hash: str) -> bool:
 
 
 def authenticate_user(db: Session, email: str, password: str) -> User | None:
-    user = db.query(User).filter(User.email == email).first()
+    user = db.query(User).options(joinedload(User.role)).filter(User.email == email).first()
     if not user or not verify_password(password, user.password_hash):
         return None
     return user

@@ -28,6 +28,9 @@ CREATE TABLE IF NOT EXISTS documents (
   id INT PRIMARY KEY AUTO_INCREMENT,
   title VARCHAR(255),
   file_path VARCHAR(255),
+  file_content LONGBLOB,
+  content_type VARCHAR(100),
+  file_size INT,
   uploaded_by INT,
   uploaded_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
   FOREIGN KEY (uploaded_by) REFERENCES users(id)

@@ -1,11 +1,11 @@
-from fastapi import APIRouter, Depends, HTTPException, status
+from fastapi import APIRouter, BackgroundTasks, Depends, HTTPException, status
 from fastapi.security import OAuth2PasswordRequestForm
 from sqlalchemy.orm import Session
 
 from app.database import get_db
 from app.schemas.auth import LoginRequest, LoginResponse, UserProfile
 from app.services.auth_service import authenticate_user
-from app.services.log_service import log_activity
+from app.services.log_service import log_activity_async
 from app.utils.jwt import create_access_token
 from app.utils.rbac import get_current_user
 
@@ -22,7 +22,11 @@ def to_profile(user) -> UserProfile:
 
 
 @router.post("/login", response_model=LoginResponse)
-def login(payload: LoginRequest, db: Session = Depends(get_db)):
+def login(
+    payload: LoginRequest,
+    background_tasks: BackgroundTasks,
+    db: Session = Depends(get_db),
+):
     user = authenticate_user(db, payload.email, payload.password)
     if not user:
         raise HTTPException(
@@ -31,13 +35,15 @@ def login(payload: LoginRequest, db: Session = Depends(get_db)):
         )
 
     token = create_access_token({"sub": str(user.id), "role": user.role.name})
-    log_activity(db, user.id, "login", "User logged in")
+    background_tasks.add_task(log_activity_async, user.id, "login", "User logged in")
     return LoginResponse(access_token=token, user=to_profile(user))
 
 
 @router.post("/token", response_model=LoginResponse)
 def token_login(
-    form_data: OAuth2PasswordRequestForm = Depends(), db: Session = Depends(get_db)
+    background_tasks: BackgroundTasks,
+    form_data: OAuth2PasswordRequestForm = Depends(),
+    db: Session = Depends(get_db),
 ):
     user = authenticate_user(db, form_data.username, form_data.password)
     if not user:
@@ -47,7 +53,9 @@ def token_login(
         )
 
     token = create_access_token({"sub": str(user.id), "role": user.role.name})
-    log_activity(db, user.id, "login", "User logged in via Swagger")
+    background_tasks.add_task(
+        log_activity_async, user.id, "login", "User logged in via Swagger"
+    )
     return LoginResponse(access_token=token, user=to_profile(user))
 
 
